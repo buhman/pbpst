@@ -109,22 +109,22 @@ main (signed argc, char * argv []) {
         exit_status = EXIT_FAILURE; goto cleanup;
     }
 
-    if ( (def_prov = json_object_get(mem_db, "default_provider")) ) {
-        def_provider = json_string_value(def_prov);
-    } else if ( !state.provider ) {
-        size_t len = strlen("https://ptpb.pw/") + 1;
-        state.provider = malloc(len);
-        if ( !state.provider ) {
-            exit_status = CURLE_OUT_OF_MEMORY;
-            goto cleanup;
-        } snprintf(state.provider, len, "https://ptpb.pw/");
-    } else {
+    if ( state.provider ) {
         size_t len = strlen(state.provider);
         if ( state.provider[len - 1] != '/' ) {
             state.provider = realloc(state.provider, len + 2);
             char * suffix = state.provider + len;
             *suffix = '/'; *(suffix + 1) = '\0';
         }
+    } else if ( (def_prov = json_object_get(mem_db, "default_provider")) ) {
+        def_provider = json_string_value(def_prov);
+    } else {
+        size_t len = strlen("https://ptpb.pw/") + 1;
+        state.provider = malloc(len);
+        if ( !state.provider ) {
+            exit_status = CURLE_OUT_OF_MEMORY;
+            goto cleanup;
+        } snprintf(state.provider, len, "https://ptpb.pw/");
     }
 
     exit_status = !state.init ? pbpst_dispatch(&state) : EXIT_SUCCESS;
